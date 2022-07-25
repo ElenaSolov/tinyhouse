@@ -1,20 +1,33 @@
-import { listings } from "../listings";
+import { IDatabase, IListing } from "../lib/types";
+import { ObjectId } from "mongodb";
 
 export const resolvers = {
   Query: {
-    listings: () => {
-      return listings;
+    listings: async (
+      _root: undefined,
+      _args: Record<string, never>,
+      { db }: { db: IDatabase }
+    ) => {
+      return await db.listings.find({}).toArray();
+      //  find method allows to find objects in db based on the query, empty object will return all documents
     },
   },
 
   Mutation: {
-    deleteListing: (_root: undefined, { id }: { id: string }) => {
-      for (let i = 0; i < listings.length; i++) {
-        if (listings[i].id === id) {
-          return listings.splice(i, 1)[0];
-        }
-      }
-      throw new Error("Listing is not found!");
+    deleteListing: async (
+      _root: undefined,
+      { id }: { id: string },
+      { db }: { db: IDatabase }
+    ) => {
+      const deleteRes = await db.listings.findOneAndDelete({
+        _id: new ObjectId(id),
+      });
+      if (!deleteRes) throw new Error("Deletion failed");
+      return deleteRes.value;
     },
+  },
+
+  Listing: {
+    id: (listing: IListing): string => listing._id.toString(),
   },
 };

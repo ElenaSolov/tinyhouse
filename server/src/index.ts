@@ -11,7 +11,7 @@ async function startApolloServer(typeDefs: any, resolvers: any) {
   const server = new ApolloServer({
     typeDefs,
     resolvers,
-    context: () => ({ db }),
+    context: () => ({ db }), //place db object to context to be able to access it from all graphql resolvers
   });
 
   // Required logic for integrating with Express
